@@ -17,3 +17,11 @@
 
 2. **Thao**:
     - 07-21 (Tuesday): Finish assigned parts of TP01 document and submit it for review.
+
+# Second meeting (7-28-2026)
+
+## Tasks
+- Dev: Finish pipeline with JWT and bcrypt for authentication.
+- Dev: Implement the dashboard page and ensure it is only accessible to authenticated users.
+- Document: Gather information about JWT, bcrypt(hashing), Flask relevant to the application
+- Document: Suggest plan on writing the paper
