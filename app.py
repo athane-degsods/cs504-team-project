@@ -80,6 +80,9 @@ def login():
 
     auth_state, token = validate_authentication(auth_state, dict_user)
 
+    # Add the token to the response data. This is for testing purposes. 
+    data["JWT_token"] = token
+
     if auth_state["authenticated"]:
         response = make_response({'message': 'Login successful', "data": data})
         response.set_cookie('jwt_token', token)
@@ -114,8 +117,18 @@ def register():
 
 @app.route('/dashboard', methods=['GET'])
 @token_required
-def dashboard(current_user):
+def dashboard(current_user, iat, nbf, exp):
     """Route for the dashboard page."""
     print(f"Accessing dashboard for user: {current_user}")
+    print(f"Token issued at: {iat}, not before: {nbf}, expires at: {exp}")
 
+    # return a request to the dashboard page containing the current_user, iat, nbf, and exp in the response data
     return render_template('dashboard.html')
+
+@app.route('/state', methods=['GET'])
+@token_required
+def state(current_user, iat, nbf, exp):
+    """Route for the state page."""
+
+    # return a request to the state page containing the current_user, iat, nbf, and exp in the response data
+    return {'current_user': current_user, 'iat': iat, 'nbf': nbf, 'exp': exp}, 200

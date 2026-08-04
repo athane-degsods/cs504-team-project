@@ -80,6 +80,18 @@
         
         log.textContent = 'Submitting form: ' + username + ', ' + password + ', ' + PIN;
         log.textContent += '\n';
-        log.textContent += 'Submission result: ' + JSON.stringify(submission);   
+        log.textContent += 'Submission result: ' + JSON.stringify(submission);
+        log.textContent += '\n';
+
+        if(submission.message == 'Login successful') {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = 'Dashboard';
+            button.addEventListener('click', function() {
+                window.location.href = '/dashboard';
+            });
+
+            log.appendChild(button);
+        }
     });        
 </script>
