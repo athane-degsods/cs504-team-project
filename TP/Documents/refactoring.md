@@ -1,0 +1,182 @@
+# First refactoring.
+
+## 1. Project cleanup and environment setup
+
+- Remove Binaries: remove sqldiff.exe, sqlite3.exe, etc. 
+  
+- Clean caches: add __pycache__ to .gitignore and remove all __pycache__ directories from the project.
+
+- Dependency management: create requirements.txt file to lock in flask and other dependencies (pending)
+
+**Environment setup:**
+
+```shell
+# create virtual environment
+python -m venv venv
+
+# activate virtual environment (PS)
+venv\Scripts\activate
+```
+
+**Install dependencies:**
+
+```bash
+pip install Flask Flask-SQLAlchemy pytest
+```
+
+--> Add those dependencies to `requirements.txt`
+
+```bash
+pip freeze > requirements.txt
+```
+
+Run `pip install -r requirements.txt` to install dependencies in the future.
+
+## 2. Database abstraction
+
+- Introduce a database abstraction layer to separate database operations from the application logic. 
+
+--> SQLAlchemy (a popular ORM for Python) will be implemented to handle database interactions.
+
+### 2.1. Set up and configure SQLAlchemy
+
+1. Update the `app.py` file to include SQLAlchemy configuration (temporary)
+
+2. Try running the flask app -> Worked -> move to the next step
+
+### 2.2. Creating models for the database tables
+
+Generally, model is typically a Python class that match the columns of a corresponding database table.
+
+1. Create a new file `models.py` to define the models for the database tables.
+
+2. Link the models to the SQLAlchemy instance in `app.py`. 
+Renaming `app.py` to `run.py` to avoid confusion from importing. It didn't solve the circular import issue -> the actual solution is to move the import of the User model to after the db is initialized in `run.py`.
+
+### 2.3. Translating current queries to SQLAlchemy ORM queries
+
+1. Access `query.py` and translate the current queries to SQLAlchemy ORM queries.
+
+2. For a cleaner interaction, I will put the newly translated queries in a new file `orm_query.py` to avoid confusion with the old queries.
+
+### 2.4. Session management
+
+```
+    db.session.add(user)
+    db.session.commit()
+```
+these are used in `orm_query.py` to manage the session and commit changes to the database.
+
+## 3. Modularization
+
+- Split the application into multiple modules to improve maintainability and readability.
+
+- Register blueprints for different parts of the application.
+
+### 3.1. Folder structure established
+
+```
+|-flasky
+  |-app/ -> create app folder to hold the application code
+    |-templates/ -> move templates folder into app folder
+    |-static/ -> create static folder to hold static files
+    |-main/ -> create main folder to hold the blueprints
+      |-__init__.py 
+      |-errors.py
+      |-forms.py
+      |-views.py
+    |-__init__.py
+    |-email.py -> low priority, can be implemented later
+    |-models.py -> move models.py into app folder
+  |-migrations/ -> low priority, contains database migration scripts
+  |-tests/ -> create test folder
+    |-__init__.py
+    |-test*.py
+  |-venv/ -> already created via `python -m venv venv`
+  |-requirements.txt -> already created
+  |-config.py -> Create config.py to store configuration settings
+  |-flasky.py -> Change run.py to flasky.py
+  |-TP/ -> create TP folder to hold team project files
+  |-legacy/ -> create legacy folder hold the old code that now is refactored into the new structure
+```
+
+*Adopted from Flask Web Development, 2nd Edition*
+
+**app/__init__.py**:
+This file will contain the application factory function to create and configure the Flask application instance. In order words, it will be the entry point of the application.
+
+Current flow is:
+
+```mermaid
+flowchart LR
+  A[flasky.py] --> B[app/__init__.py]
+  B --> C(create_app function)
+```
+
+In the original approach, the application instance was created directly in `flasky.py`, which makes routing simple by using `@app.route` decorators. After implementing this change, the application instance is created at runtime, `@app.route` only exists after `create_app` is invoked. It is too late for `@app.route` decorators to register routes. 
+
+To solve the upper problem, Flask provides Blueprints, which allow us to organize the application into modules and register routes after the application instance is created.
+
+This approach is more flexible and allows better organization for the code structure. It also makes it easier to test and maintain the application.
+
+**app/main/__init__.py**: main blueprint creation
+
+After creating the main blueprint, we need to register it in the application factory function in `app/__init__.py`
+
+After that, we can create `app/main/errors.py`, and `app/main/views.py` to handle the routes and error pages.
+
+At this point of refactoring, I am introduced with the concept of WTForms, which is a FLask extension that simplifies form handling and validation. I will use it to handle the form in `app/main/views.py`.
+
+Original flow
+
+```mermaid
+flowchart LR
+  A[index.html] --> B["< form> -> submit"]
+  B -->|POST| C["app.py(main route) -> request.form"] 
+```
+
+New flow
+
+```mermaid
+flowchart LR
+  A[index.html] --> B["< form> -> submit"]
+  B -->|POST| C["app/main/views.py -> form handling"]
+  C --> D["app/main/forms.py -> form validation"]
+  D --> E["app/main/views.py -> process form"]
+  E --> F["app/main/views.py -> render_template"]
+```
+
+At this step, I will need to create a `forms.py` file in the `app/main/` directory to define the form class and its validation rules.
+
+Install Flask-WTF to handle forms:
+
+```bash
+pip install flask-wtf
+```
+
+I also learned that Flask renders templates using Jinja2 engine. This means that the template HTML files can contain dynamic content and logic using Jinja2 syntax. I don't have to follow the original approach of using `request.form` ot access form data.
+
+A useful option for styling in Flask is to use Flask-Bootstrap, which integrates Bootstrap framework with Flask. It provides a set of templates and macros that make it easier to create responsive and visually appealing web pages.
+
+I put the main script into `flasky.py` which invokes the `create_app` function to create the application instance to test the refactored code.
+
+Set environment Flask variable:
+
+```bash
+set FLASK_APP=flasky.py
+set FLASK_DEBUG=1
+```
+
+`python flasky.py` runs the application without returning any error. The pipeline worked, now I can proceed to implement further refactoring and testing.
+
+A `basic_tests.py` file is created in the `tests/` folder. **Caution** the name of the file must start with `test_` for pytest to discover the tests.
+
+Took me a while wiring the frontend to blueprint, it has not yet implement bootstrap styling. I will implement it later. Now I will focus on implementing the database so that I can test the login and registration functionality.
+
+First thing to do is to create the table that defined in the `models.py` file. It can be done via `flask --app flasky shell` command, then run `db.create_all()` to create the table (users) in the database.
+
+## 4. Implementing testing suite
+
+- Create a test folder and use pytest to write unit tests.
+
+- Run the tests to ensure that the application behaves as expected.

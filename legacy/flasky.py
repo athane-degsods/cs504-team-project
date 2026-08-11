@@ -1,4 +1,7 @@
 """Important modules and initializes the Flask application."""
+import os
+
+from flask_sqlalchemy import SQLAlchemy
 
 from flask import Flask, render_template, request, make_response
 from backend.query import get_user_by_username, create_user
@@ -132,3 +135,21 @@ def state(current_user, iat, nbf, exp):
 
     # return a request to the state page containing the current_user, iat, nbf, and exp in the response data
     return {'current_user': current_user, 'iat': iat, 'nbf': nbf, 'exp': exp}, 200
+
+## TEMP: SQLALCHEMY SETUP
+# get the absolute path of the current directory
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+# set up the database URI for SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database', 'auth.db')
+
+# best practice to disable track modifications
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# init
+db = SQLAlchemy(app)
+
+# Importing the User model after db is initialized to avoid circular imports
+from legacy.orm_query import find_user_by_username
+
+print(f"Test user fetching: {find_user_by_username('testuser')}")
