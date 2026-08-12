@@ -7,6 +7,8 @@ from . import main
 from .forms import LoginForm, RegisterForm
 from .. import db
 from ..models import User
+from ..orm_query import find_user_by_username, create_user
+from ..utils import hash_password, check_password
 
 # @main.route('/', methods=['GET', 'POST'])
 # def index():
@@ -36,13 +38,33 @@ def login():
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
-    """Register page view."""
+    """
+        Register page view.
+        The flow of this function is:
+        Create an instance of the RegisterForm -> Validate the form
+        -> If valid, hash the password and check if the username already exists in the database
+        -> If the username is not taken, create a new user and add it to the database
+        -> Redirect to the login page
+    """
     form = RegisterForm()
+    print(f"Form data: username={form.username.data}, password={form.password.data}, pin={form.pin.data}")
     if form.validate_on_submit():
-        # Add the new user to the database
-        new_user = User(username=form.username.data, password=form.password.data, pin=form.pin.data)
-        db.session.add(new_user)
-        db.session.commit()
-        session['username'] = new_user.username
-        return redirect(url_for('.index'))
+        print("Form is valid -> Hashing password")
+        hashed_password = hash_password(form.password.data)
+        hashed_pin = hash_password(form.pin.data)
+        print(f"Password is hashed from {form.password.data} to {hashed_password}")
+        print(f"PIN is hashed from {form.pin.data} to {hashed_pin}")
+        print(f"Checking if username {form.username.data} already exists")
+        existing_user = find_user_by_username(form.username.data)
+        if existing_user:
+            print("Username already exists")
+            form.username.errors.append('Username already exists.')
+        else:
+            print("Username is available -> Creating new user")
+            new_user = User(username=form.username.data, password=hashed_password, pin=hashed_pin)
+            create_user(new_user, hashed_password, hashed_pin)
+            print(f"New user created: {new_user}")
+    else:
+        print("Form is not valid")
+        print(f"Form errors: {form.errors}")
     return render_template('register.html', form=form)

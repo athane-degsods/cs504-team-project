@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from flask import Flask, render_template, request, make_response
 from backend.query import get_user_by_username, create_user
-from backend.utils import tuple_to_dict, hash_password, check_password
+from app.utils import tuple_to_dict, hash_password, check_password
 from backend.session import generate_token, token_required
 
 app = Flask(__name__)

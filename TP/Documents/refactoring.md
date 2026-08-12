@@ -175,6 +175,28 @@ Took me a while wiring the frontend to blueprint, it has not yet implement boots
 
 First thing to do is to create the table that defined in the `models.py` file. It can be done via `flask --app flasky shell` command, then run `db.create_all()` to create the table (users) in the database.
 
+
+**Database interaction**
+
+This part is where I will try to work with the database using SQLAlchemy ORM queries.
+
+From the earlier step, I created the table in the database, how can I verify if the table is created successfully? I can create a unit test to check that. 
+
+![1786483358505](image/refactoring/1786483358505.png)
+
+The table was created successfully after running the command in the flask shell. Now I can implement the registration and login functionality using SQLAlchemy ORM queries.
+
+For simplicity, I will implement the registration and login functionality in the `app/main/views.py` file. I will create a new file `orm_query.py` to hold the SQLAlchemy ORM queries for user registration and login.
+
+*Registration*
+
+Caution: Must use `{{ form.hidden_tag() }}` in the templates to include the CSRF token for form submission. Otherwise, the form will not be valid.
+
+CSRF is an important piece in cybersecurity to securing your application from Cross-Site Request Forgery attacks.
+
+
+
+
 ## 4. Implementing testing suite
 
 - Create a test folder and use pytest to write unit tests.
