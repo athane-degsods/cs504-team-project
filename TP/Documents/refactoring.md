@@ -194,6 +194,11 @@ Caution: Must use `{{ form.hidden_tag() }}` in the templates to include the CSRF
 
 CSRF is an important piece in cybersecurity to securing your application from Cross-Site Request Forgery attacks.
 
+This module cost me a lot of time due to a stupid mistake by invoking `User()` class and `create_user()` function at the same time. `create_user()` function is already creating a new User instance, so I don't need to create a new User instance in the `views.py` file. The registration functionality is working now, I can proceed to implement the login functionality.
+
+*Login*
+The login pipeline is working now. Now there is one missing piece, which is the session management. Currently, I cannot keep track of the logged-in user. 
+
 
 
 

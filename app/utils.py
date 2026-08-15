@@ -15,7 +15,7 @@ def tuple_to_dict(tuple_values, arr_keys):
 
     return d
 
-def hash_password(password):
+def hash_string(password):
     """Hashes the password using a simple hashing algorithm."""
 
     bytes_password = password.encode('utf-8')
@@ -28,16 +28,20 @@ def hash_password(password):
     print(f"Salt: {salt}")
     print(f"Password hashed: {hashed_password}")
 
+    hashed_password = hashed_password.decode('utf-8')
+
     return hashed_password
 
-def check_password(input_password, stored_hashed_password):
+def compare_input_to_stored_hash(input_password, stored_hashed_password):
     """Check if the input password matches the stored hashed password."""
-    print(f"stored_hashed_password: {stored_hashed_password}")
-
     try:
+
+        # Encoding both the input password and the stored hashed password to bytes before comparison
         bytes_input_password = input_password.encode('utf-8')
+        stored_hashed_password = stored_hashed_password.encode('utf-8')
 
         is_valid = bcrypt.checkpw(bytes_input_password, stored_hashed_password)
+        print(f"Password match result: {is_valid}")
         return is_valid
 
     except (ValueError, TypeError):

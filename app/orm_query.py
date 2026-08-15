@@ -9,7 +9,8 @@ def find_user_by_username(username):
 
 def create_user(username, password, PIN):
     """Create a new user in the database"""
-    print(f"create_user invoked with username: {username}")
+    print(f"create_user invoked with username: {username}, hashed password: {password}, hashed PIN: {PIN}")
+    print(f"type of username: {type(username)}, type of password: {type(password)}, type of PIN: {type(PIN)}")
     user = User(username=username, password=password, pin=PIN)
     print("adding user to the database session")
     db.session.add(user)
