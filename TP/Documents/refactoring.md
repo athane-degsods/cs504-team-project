@@ -199,6 +199,40 @@ This module cost me a lot of time due to a stupid mistake by invoking `User()` c
 *Login*
 The login pipeline is working now. Now there is one missing piece, which is the session management. Currently, I cannot keep track of the logged-in user. 
 
+**Session management**
+
+This application use flask-login to have a full session management functionality. 
+
+*Update User model:* I need to update the User model with the `UserMixin` class to provide authentication methods and properties for the User model.
+
+*LoginManager:* is added to the application `__init__.py` to handle user sessions.
+
+Add the `@login_required` decorator to the index route to restrict access to authenticated users only. Now we need to implement the login function in the `views.py` via `login_user()`.
+
+After all those steps, the user is now can be authenticated and logged in. The session management is working now, I can proceed to implement the logout functionality. 
+
+Add a `/logout` route to the `views.py` file to handle user logout via `logout_user()` function.
+
+Everthing is working now. However, there are things that I need to improve:
+- Implement navigation for the user to navigate between frontend pages.
+- Migrate user validating and authentication to `forms.py` file, leaving the `views.py` file to handle the routing and rendering templates only.
+- Improve the error handling and flash messages to help the user to understand what is going on in the application.
+
+**Frontend**
+- Implement bootstrap, wtf for navigation.
+- Supporting documents: https://www.geeksforgeeks.org/python/template-inheritance-in-flask/
+  
+**Form classes**
+- `RegistrationForm` class to handle user registration form and validation.
+-> Audit `forms.py` file to validate the form fields
+-> Move hash logic to `models.py` file. Password hashing follows book's intruction works -> move on to implement pin hashing in `models.py` file. After this step, the records of hashed password and pin are stored in the database on registration, however, the current login logic in `views.py` allows me to print the plaintext password and pin to the console. I think this is a security issue, and needed to be working on.
+-> Audit `views.py` by removing the plaintext password and pin from the console printout. Also, rip off the hashing and verification logic from `views.py`. They both work now. I book introduces `flash` function to display the message to the user, I will try to implement it in the next step. This is the source I found from flask documentation: https://flask.palletsprojects.com/en/stable/patterns/flashing/
+-> manage "flash" messages to display the message to the user. The loop works well, now let's move to refactoring the login loop accordingly.
+-> Everything works well now. 
+NEXT STEP:
+1. Implement second factor authentication (2FA) using email verification.
+2. Implement testing suite to test the application functionality.
+3. Improve the code quality and maintainability by refactoring the codebase.
 
 
 

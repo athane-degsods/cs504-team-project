@@ -1,1 +1,16 @@
-<h1>Hello World!</h1>
+{% extends "base.html" %}
+
+{% block title %}Flasky - Home{% endblock %}
+
+{% block page_content %}
+    <h1>Welcome to My Flask App</h1>
+    <p>This is the home page.</p>
+        Hello,
+    {% if current_user.is_authenticated %}
+        {{ current_user.username }}
+    {% else %}
+        Stranger
+    {% endif %}!
+    <a href="{{ url_for('main.logout') }}">Log Out</a>
+{% endblock %}
+

@@ -1,12 +1,17 @@
-{% block title %}Login{% endblock %}
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flasky - Login{% endblock %}
 
 {% block page_content %}
+<div class="page-header">
     <h1>Login</h1>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        {{ form.username.label }} {{ form.username() }}
-        {{ form.password.label }} {{ form.password() }}
-        {{ form.pin.label }} {{ form.pin() }}
-        {{ form.submit() }}
-    </form>
+</div>
+<div class="col-md-4">
+    {{ form.hidden_tag() }}
+    {{ form.csrf_token }}
+    {{ wtf.form_errors(form) }}
+    {{ wtf.quick_form(form) }}
+</div>
 {% endblock %}

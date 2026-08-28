@@ -35,7 +35,6 @@ def hash_string(password):
 def compare_input_to_stored_hash(input_password, stored_hashed_password):
     """Check if the input password matches the stored hashed password."""
     try:
-
         # Encoding both the input password and the stored hashed password to bytes before comparison
         bytes_input_password = input_password.encode('utf-8')
         stored_hashed_password = stored_hashed_password.encode('utf-8')
