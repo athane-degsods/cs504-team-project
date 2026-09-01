@@ -1,0 +1,5 @@
+Hello {{ user.username }},
+
+You have not verified your email address yet. Please click on the following link to verify your account:
+
+{{ url_for('main.verify', token=token, _external=True) }}

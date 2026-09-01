@@ -3,7 +3,7 @@
 """
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, Length , Regexp, EqualTo
+from wtforms.validators import DataRequired, Length , Regexp, EqualTo, Email
 
 from app.models import User
 
@@ -17,8 +17,6 @@ class LoginForm(FlaskForm):
                 - Length: Ensure that the input length is within a (1, 64) range
                 - Regexp: Ensure that the input matches a specific regular expression pattern
             2. Password:
-                - DataRequired: Ensure that the field is not empty
-            3. PIN:
                 - DataRequired: Ensure that the field is not empty
     """
     # username = StringField('Username', validators=[DataRequired()])
@@ -35,9 +33,6 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[
         DataRequired(message="Password is required."),
     ])
-    pin = PasswordField('PIN', validators=[
-        DataRequired(message="PIN is required."),
-    ])
     submit = SubmitField('Login')
 
 
@@ -53,8 +48,6 @@ class RegisterForm(FlaskForm):
                 - DataRequired: Ensure that the field is not empty
                 - EqualTo: Ensure that the input matches the value of repeat_password field
             3. Repeat Password:
-                - DataRequired: Ensure that the field is not empty
-            4. PIN:
                 - DataRequired: Ensure that the field is not empty
     """
     # username = StringField('Username', validators=[DataRequired()])
@@ -76,8 +69,10 @@ class RegisterForm(FlaskForm):
     repeat_password = PasswordField('Repeat Password', validators=[
         DataRequired(message="Please repeat your password."),
     ])
-    pin = PasswordField('PIN', validators=[
-        DataRequired(message="PIN is required."),
+    email = StringField('Email', validators=[
+        DataRequired(message="Email is required."),
+        Length(1, 120, message="Email must be between 1 and 120 characters."),
+        Email(message="Invalid email address."), # notice the user on invalid email address
     ])
     submit = SubmitField('Register')
 
@@ -85,3 +80,20 @@ class RegisterForm(FlaskForm):
         """Validate username"""
         if User.query.filter_by(username=field.data).first():
             raise ValueError('Username already in use.')
+
+    def validate_email(self, field):
+        """Validate email"""
+        if User.query.filter_by(email=field.data).first():
+            raise ValueError('Email already in use.')
+
+
+class VerifyPinForm(FlaskForm):
+    """
+        Verify PIN form.
+    """
+    input = StringField('PIN', validators=[
+        DataRequired(message="PIN is required."),
+        Length(6, 6, message="PIN must be exactly 6 digits."),
+        Regexp('^[0-9]{6}$', 0, 'PIN must consist of exactly 6 digits.')
+    ])
+    submit = SubmitField('Verify PIN')

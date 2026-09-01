@@ -1,0 +1,11 @@
+Dear {{ user.username }},
+
+Welcome to my application!
+
+To confirm your account please click on the following link:
+
+{{ url_for('main.verify', token=token, _external=True) }}
+
+Sincerely,
+
+The Team
