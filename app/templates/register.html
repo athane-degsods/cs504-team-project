@@ -7,9 +7,9 @@
     <form method="POST">
         {{ form.hidden_tag() }}
         {{ form.username.label }} {{ form.username() }}
+        {{ form.email.label }} {{ form.email() }}
         {{ form.password.label }} {{ form.password() }}
         {{ form.repeat_password.label }} {{ form.repeat_password() }}
-        {{ form.pin.label }} {{ form.pin() }}
         {{ form.submit() }}
     </form>
 {% endblock %}

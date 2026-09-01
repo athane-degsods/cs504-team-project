@@ -175,6 +175,8 @@ Took me a while wiring the frontend to blueprint, it has not yet implement boots
 
 First thing to do is to create the table that defined in the `models.py` file. It can be done via `flask --app flasky shell` command, then run `db.create_all()` to create the table (users) in the database.
 
+I completed the routes and logics for the registration and login functionality. However, while testing the pipeline, I found that the used functions and libraries in the book are outdated, and I need to find a lot of substitutes to make the pipeline work as intended.
+
 
 **Database interaction**
 
@@ -234,9 +236,98 @@ NEXT STEP:
 2. Implement testing suite to test the application functionality.
 3. Improve the code quality and maintainability by refactoring the codebase.
 
+## 4. Implementing second factor authentication (2FA)
 
+### 4.1. Overview
 
-## 4. Implementing testing suite
+In this section, I will implement a second factor authentication (2FA) mechanism as a completion to the MFA system. The choice of 2FA method is email verification. 
+
+On registration, the user will be required to provide a valid email address -> A verification email will be sent to the provided email address -> The user will verify their email address by clicking on the verification link in the email.
+
+On login, the user will have to provide their username, password, and pin -> If the credentials are valid, a verification email will be sent to the user's registered email address -> The user will verify their login session by clicking on the verification link in the email.
+
+### 4.2. Implementation
+
+#### 4.2.1. Database changes
+- Add a new column `email` to the `User` model to store the user's email address.
+- Add a new column `is_email_verified` to the `User` model to store the email verification status of the user.
+
+-> The `forms.py` file should have a new field for email address in the registration form (the design is learned from the book)
+
+-> Update the frontend templates to include the email field in the registration form.
+
+-> Email address also needed to be validated to ensure that it is a valid email address, as well as unique in the database.
+
+-> Update `views.py` to handle the email verification process during registration and login.
+
+At this step, the database needed to be migrated to include the new columns, or I can drop the table and create a new one with the new columns. I will choose the latter approach for simplicity.
+
+```bash
+flask --app flasky shell
+db.drop_all()
+db.create_all()
+```
+
+Verify in Letos -> It worked well.
+![1787962326671](image/refactoring/1787962326671.png)
+
+#### 4.2.2. Email sending
+
+Before developing the logic for email verification, I need to set up an email sending service, and configure the application to use it. This can be done via Flask-Mail. Detailed can be found in the book, chapter 6. Email.
+
+Install the Flask-Mail extension:
+
+```bash
+pip install Flask-Mail
+pip freeze > requirements.txt
+```
+
+Here is the default configuration table for an email sending service:
+
+![1787962619152](image/refactoring/1787962619152.png)
+
+The function `send_email()` would be implemented to send the verification email to the user. It will be stored at `app/email.py` file. The function will be called in the `views.py` file after the user is registered or logged in.
+
+Email service configuration will be stored in the `config.py` file. Since I cannot access the email instance as a global instance, I will have to interact with it via the `current_app` context, or proxy object (https://flask.palletsprojects.com/en/stable/reqcontext/#notes-on-proxies). By using the method `_get_current_object()`, I can access the actual email instance and use it to send the email function.
+
+The `.env` file needs to be created to store the email service credentials and the application secret key. It should be ignored as well.
+
+The mail connection needs a sender email and an app password to send the email. I followed this link: https://wiki.xcitium.com/frontend/web/topic/how-to-create-an-app-password-for-gmail, and managed to create it -> add them to the `.env` file.  
+
+I'll try to create a test email program to see if the email sending service works. 
+
+![1788153767374](image/refactoring/1788153767374.png)
+
+I worked, so I can confidently implement the email verification logic. I would need two templates files for the email verification process.
+
+So, the idea is to have the user click on a verification link in the email, which looks like this `http://localhost:5000/verify_email/<token>`. The token is generated using the `itsdangerous` library.
+
+`itsdangerous` allows me to generate a token that can be ussed to sign the user session cookie. If the content of the user session is altered, the token will be invalidated. Among types of token generators, I will use `TimedJSONWebSignatureSerializer` with a time expiration of 60 minutes.
+
+**User account verification**
+
+Update `models.py` to include a method to generate the email verification token and a method to verify the token.
+
+There was no `TimedJSONWebSignatureSerializer` class in the `itsdangerous` library, so I will use `URLSafeTimedSerializer` class instead. 
+
+**`/verify_email/<token>` route**
+- Create a new route in `views.py` to handle the email verification process.
+
+**Expecting user authentication flow:**
+
+User submit registration form -> If the form is valid, send verification email to the user -> Flask redirect to the login page with a flash message to inform the user to check their email for verification -> The app check for the verification column in the database, if it is `False`, the user will not be able to log in and will be prompted to check their email for verification. If it is `True`, the user will be able to log in -> A session token will be generated and stored in the user session cookie to keep track of the logged-in user -> As soon as the user logs out, the session token will be invalidated and the user will be logged out.
+
+On email verification, the user will click on the verification link in the email (epired in 60 minutes) -> Verification column in the database will be flipped to `True` -> Flask redirect to the login page with a flash message to inform the user that their email is verified and they can now log in.
+
+#### 4.3. Seond factor authentication (2FA) implementation
+
+Move `PIN` to the email verification process, the user now register with the username and password and email. `PIN` will be sent to the user's email after the user is registered. 
+
+`secrets` is implemented to generate a random 6-digit PIN. https://docs.python.org/3/library/secrets.html
+
+Everything works well now. I will push the code to the repo and continue to implement the testing suite.
+
+## 5. Implementing testing suite
 
 - Create a test folder and use pytest to write unit tests.
 

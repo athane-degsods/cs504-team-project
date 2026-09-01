@@ -2,16 +2,17 @@
 
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}Flasky - Login{% endblock %}
+{% block title %}Flasky - Verify PIN{% endblock %}
 
 {% block page_content %}
     <div class="page-header">
-        <h1>Login</h1>
+        <h1>Verify PIN</h1>
     </div>
-    <div class="col-md-4">
+    <form method="POST">
+        Enter the PIN sent to your email to complete the registration process.
         {{ form.hidden_tag() }}
         {{ form.csrf_token }}
         {{ wtf.form_errors(form) }}
         {{ wtf.quick_form(form) }}
-    </div>
+    </form>
 {% endblock %}
