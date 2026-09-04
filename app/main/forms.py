@@ -2,7 +2,7 @@
     This script contains the forms used in the application.
 """
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField, ValidationError
 from wtforms.validators import DataRequired, Length , Regexp, EqualTo, Email
 
 from app.models import User
@@ -84,7 +84,8 @@ class RegisterForm(FlaskForm):
     def validate_email(self, field):
         """Validate email"""
         if User.query.filter_by(email=field.data).first():
-            raise ValueError('Email already in use.')
+            # more information about validationerror here: https://wtforms.readthedocs.io/en/2.3.x/validators/
+            raise ValidationError('Email already in use.')
 
 
 class VerifyPinForm(FlaskForm):

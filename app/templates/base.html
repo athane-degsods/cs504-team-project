@@ -1,20 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Flask App</title>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>My Flask App</title>
+    </head>
 
-<body>
-    <nav>
-        <a href="/login">Log In</a>
-        <a href="/register">Register</a>
-    </nav>
-    {% block page_content %}{% endblock %}
+    <body>
+        <div>
+            <nav class="navbar">
+                <a href="/login">Log In</a>
+                <a href="/register">Register</a>
+            </nav>
 
-    {% for messages in get_flashed_messages() %}
-        <div class="flash-message">{{ messages }}</div>
-    {% endfor %}
-</body>
+            {% block page_content %}{% endblock %}
+
+            <!-- This document explains how to retrieve flash messages -->
+            <!-- https://flask.palletsprojects.com/en/stable/patterns/flashing/ -->
+                {% if form is defined %}
+                {% for field_name, field_errors in form.errors.items() %}
+                    {% if field_errors %}
+                        {% for error in field_errors %}
+                            <p class="form-error message-container">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <p class="flash-message message-container">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </body>
 </html>
+
+<style>
+    .navbar {
+        background-color: Orange;
+        padding: 10px;
+        text-align: right;
+    }
+    .navbar a {
+        margin-right: 10px;
+        color: white;
+        text-decoration: none;
+    }
+    .navbar a:hover {
+        text-decoration: underline;
+    }
+    .flash-message {
+        color: black;
+        font-weight: bold;
+    }
+    .form-error {
+        color: black;
+        font-weight: bold;
+    }
+    .button {
+        background-color: orange; 
+        color: white;
+        padding: 10px 20px 10px 20px;
+        border: none;
+        cursor: pointer;
+        width: 100px;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+    .submit-container {
+        text-align: right;
+        margin-top: 20px;
+    }
+    .form {
+        max-width: 400px;
+        margin-top: 40px;
+        margin-bottom: 5px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 20px;
+        border: 1px solid orange;
+        border-radius: 8px;
+        background-color: white;
+    }
+    .message-container {
+        max-width: 400px;
+        margin: 10px auto;
+        padding: 10px;
+        border: 1px solid orange;
+        border-radius: 8px;
+        background-color: orange;
+    }
+    .page-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 0 10px 0 10px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+        padding: 0 20px 0 20px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid black;
+        border-radius: 4px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 15px;
+    }
+</style>

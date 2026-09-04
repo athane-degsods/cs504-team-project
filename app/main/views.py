@@ -95,6 +95,8 @@ def login():
             session['pin_verifying_user_id'] = user.id
 
             return redirect(url_for('main.verify_pin'))
+        else:
+            flash('Invalid username or password')
 
 
         # if user_exists and password_verified and email_verified:
@@ -135,10 +137,6 @@ def register():
                    'email/verify', user=user, token=token)
         flash('A verification email has been sent to your email address.')
         return redirect(url_for('main.login'))
-    else:
-        print("Form is not valid")
-        print(f"Form errors: {form.errors}")
-        flash(f"Form errors: {form.errors}")
     return render_template('register.html', form=form)
 
 @main.route('/verify_pin', methods=['GET', 'POST'])

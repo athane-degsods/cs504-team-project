@@ -1,18 +1,30 @@
 {% extends "base.html" %}
 
-{% import "bootstrap/wtf.html" as wtf %}
-
 {% block title %}Flasky - Verify PIN{% endblock %}
 
 {% block page_content %}
-    <div class="page-header">
-        <h1>Verify PIN</h1>
+    <div class="form">
+        <div class="page-header">
+            <h1>Verify PIN</h1>
+            <p>Enter the six-digit PIN sent to your email to finish signing in.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('main.verify_pin') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.input.label }}
+                {{ form.input(
+                    class="form-control",
+                    inputmode="numeric",
+                    autocomplete="one-time-code",
+                    placeholder="Enter your PIN"
+                ) }}
+            </div>
+
+            <div class="submit-container">
+                {{ form.submit(class="button") }}
+            </div>
+        </form>
     </div>
-    <form method="POST">
-        Enter the PIN sent to your email to complete the registration process.
-        {{ form.hidden_tag() }}
-        {{ form.csrf_token }}
-        {{ wtf.form_errors(form) }}
-        {{ wtf.quick_form(form) }}
-    </form>
 {% endblock %}
