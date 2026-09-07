@@ -75,26 +75,36 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         user_exists = user is not None
-        password_verified = user.verify_password(form.password.data)
-        # pin_verified = user.verify_pin(form.pin.data)
-        email_verified = user.verified if user_exists else False
 
-        if user_exists and password_verified and email_verified:
-            pin = ''.join([str(secrets.randbelow(10)) for i in range(6)])
-            expiration = datetime.now(timezone.utc) + timedelta(minutes=5)
-            print(f"Generated PIN: {pin}, Expiration: {expiration}")
-            user.pin = pin
-            user.pin_expiration = expiration
-            db.session.commit()
+        if user_exists:
+            print(f"User found: {user.username}")
+            password_verified = user.verify_password(form.password.data)
+            # pin_verified = user.verify_pin(form.pin.data)
+            email_verified = user.verified if user_exists else False
 
-            # Send the PIN to the user's email
-            send_email(user.email, "Your PIN for 2FA", 'email/pin', user=user, pin=pin)
-            flash('A PIN has been sent to your email.')
+            print(f"Password verified: {password_verified}")
+            print(f"Email verified: {email_verified}")
 
-            # assign a temporary session variable to track the user for PIN verification
-            session['pin_verifying_user_id'] = user.id
+            if not email_verified:
+                flash('Your email is not verified. Please check your email for the verification link.')
+                return redirect(url_for('main.login'))
 
-            return redirect(url_for('main.verify_pin'))
+            if password_verified and email_verified:
+                pin = ''.join([str(secrets.randbelow(10)) for i in range(6)])
+                expiration = datetime.now(timezone.utc) + timedelta(minutes=5)
+                print(f"Generated PIN: {pin}, Expiration: {expiration}")
+                user.pin = pin
+                user.pin_expiration = expiration
+                db.session.commit()
+
+                # Send the PIN to the user's email
+                send_email(user.email, "Your PIN for 2FA", 'email/pin', user=user, pin=pin)
+                flash('A PIN has been sent to your email.')
+
+                # assign a temporary session variable to track the user for PIN verification
+                session['pin_verifying_user_id'] = user.id
+
+                return redirect(url_for('main.verify_pin'))
         else:
             flash('Invalid username or password')
 
@@ -239,7 +249,9 @@ def unverified():
     """
         Unverified page view.
     """
+    print(f"Current user is anonymous: {current_user.is_anonymous}")
     if current_user.is_anonymous or current_user.verified:
+        print("Redirecting to index)")
         return redirect(url_for('main.index'))
     return render_template('main/unconfirmed.html')
 

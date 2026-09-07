@@ -79,7 +79,7 @@ class RegisterForm(FlaskForm):
     def validate_username(self, field):
         """Validate username"""
         if User.query.filter_by(username=field.data).first():
-            raise ValueError('Username already in use.')
+            raise ValidationError('Username already in use.')
 
     def validate_email(self, field):
         """Validate email"""
