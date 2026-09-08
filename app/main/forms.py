@@ -43,7 +43,6 @@ class RegisterForm(FlaskForm):
             1. Username:
                 - DataRequired: Ensure that the field is not empty
                 - Length: Ensure that the input length is within a (1, 64) range
-                - Regexp: Ensure that the input matches a specific regular expression pattern
             2. Password:
                 - DataRequired: Ensure that the field is not empty
                 - EqualTo: Ensure that the input matches the value of repeat_password field
@@ -57,10 +56,7 @@ class RegisterForm(FlaskForm):
     # submit = SubmitField('register')
     username = StringField('Username', validators=[
         DataRequired(message="Username is required."),
-        Length(1, 64, message="Username must be between 1 and 64 characters."),
-        Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
-               'Usernames must have only letters, numbers, dots or '
-               'underscores')
+        Length(1, 64, message="Username must be between 1 and 64 characters.")
     ])
     password = PasswordField('Password', validators=[
         DataRequired(message="Password is required."),
